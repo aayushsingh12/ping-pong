@@ -8,6 +8,7 @@ WHITE = (255, 255, 255)
 
 class GameEngine:
     def __init__(self, width, height):
+        self.winning_score = 5  # default target
         self.width = width
         self.height = height
         self.paddle_width = 10
@@ -61,17 +62,59 @@ class GameEngine:
         screen.blit(ai_text, (self.width * 3//4, 20))
     
     def check_game_over(self, screen):
-        if self.player_score == 5 or self.ai_score == 5:
-            winner = "Player Wins!" if self.player_score == 5 else "AI Wins!"
+        if self.player_score == self.winning_score or self.ai_score == self.winning_score:
+            winner = "Player Wins!" if self.player_score == self.winning_score else "AI Wins!"
             text = self.font.render(winner, True, WHITE)
-        
-            # Center the text on screen
             text_rect = text.get_rect(center=(self.width // 2, self.height // 2))
             screen.blit(text, text_rect)
             pygame.display.flip()
+            pygame.time.wait(2000)  # show result for 2 seconds
 
-            # Delay so players can see the message
-            pygame.time.wait(3000)  # 3 seconds
-            return True  # signal that game is over
+            #   Show replay options
+            return self.show_replay_menu(screen)
         return False
+
+    def reset_game(self):
+        self.player_score = 0
+        self.ai_score = 0
+        self.ball.reset()
+    
+    def show_replay_menu(self, screen):
+        menu_font = pygame.font.SysFont("Arial", 28)
+
+        while True:
+            screen.fill((0, 0, 0))
+            options = [
+                "Press 3 for Best of 3",
+                "Press 5 for Best of 5",
+                "Press 7 for Best of 7",
+                "Press ESC to Exit"
+            ]
+
+            for i, option in enumerate(options):
+                text = menu_font.render(option, True, WHITE)
+                rect = text.get_rect(center=(self.width // 2, 200 + i * 50))
+                screen.blit(text, rect)
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return True  # quit game
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_3:
+                        self.winning_score = 2  # best of 3 → first to 2 wins
+                        self.reset_game()
+                        return False
+                    elif event.key == pygame.K_5:
+                        self.winning_score = 3  # best of 5 → first to 3 wins
+                        self.reset_game()
+                        return False
+                    elif event.key == pygame.K_7:
+                        self.winning_score = 4  # best of 7 → first to 4 wins
+                        self.reset_game()
+                        return False
+                    elif event.key == pygame.K_ESCAPE:
+                        return True  # quit game
+
 
