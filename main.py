@@ -2,6 +2,10 @@ import pygame
 from game.game_engine import GameEngine
 
 # Initialize pygame/Start application
+
+pygame.mixer.init()
+
+
 pygame.init()
 
 # Screen dimensions
